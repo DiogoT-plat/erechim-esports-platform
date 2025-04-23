@@ -1,89 +1,98 @@
 import React from 'react';
-import { Navbar, Nav, Container, Button, Dropdown } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faSignOutAlt, faTrophy, faUsers, faGamepad } from '@fortawesome/free-solid-svg-icons';
+import { Navbar, Nav, Container, NavDropdown, Image } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../actions/userActions';
 
-const Header = ({ user, setUser }) => {
-  const navigate = useNavigate();
+const Header = () => {
+  const dispatch = useDispatch();
+  const userLogin = useSelector(state => state.userLogin);
+  const { userInfo } = userLogin;
 
   const logoutHandler = () => {
-    localStorage.removeItem('userInfo');
-    setUser(null);
-    navigate('/login');
+    dispatch(logout());
   };
 
   return (
     <header>
-      <Navbar variant="dark" expand="lg" className="navbar-dark">
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand as={Link} to="/">
-            <img
-              src="/logo.png"
-              width="40"
-              height="40"
-              className="d-inline-block align-top me-2"
-              alt="Erechim E-SPORTS Festival Logo"
-            />
-            <span className="gradient-text fw-bold">Erechim E-SPORTS Festival</span>
-          </Navbar.Brand>
+          <LinkContainer to="/">
+            <Navbar.Brand className="d-flex align-items-center">
+              <Image 
+                src="/logo.png" 
+                alt="Erechim E-sports Festival" 
+                width="40" 
+                height="40" 
+                className="me-2" 
+              />
+              Erechim E-sports Festival
+            </Navbar.Brand>
+          </LinkContainer>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <Nav.Link as={Link} to="/">
-                <FontAwesomeIcon icon={faGamepad} className="me-1" /> Início
-              </Nav.Link>
-              <Nav.Link as={Link} to="/tournaments">
-                <FontAwesomeIcon icon={faTrophy} className="me-1" /> Campeonatos
-              </Nav.Link>
-              
-              {user ? (
-                <Dropdown align="end">
-                  <Dropdown.Toggle variant="dark" id="dropdown-user">
-                    <FontAwesomeIcon icon={faUser} className="me-1" /> {user.name}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    {user.role === 'admin' && (
-                      <Dropdown.Item as={Link} to="/admin">
-                        Painel de Administração
-                      </Dropdown.Item>
-                    )}
-                    {(user.role === 'captain' || user.role === 'admin') && (
-                      <>
-                        <Dropdown.Item as={Link} to="/captain">
-                          Painel do Capitão
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/captain/team/register">
-                          Registrar Time
-                        </Dropdown.Item>
-                        <Dropdown.Item as={Link} to="/captain/player/register">
-                          Registrar Jogadores
-                        </Dropdown.Item>
-                      </>
-                    )}
-                    {(user.role === 'player' || user.role === 'admin') && (
-                      <Dropdown.Item as={Link} to="/player/tft/register">
-                        Registrar para TFT
-                      </Dropdown.Item>
-                    )}
-                    <Dropdown.Divider />
-                    <Dropdown.Item onClick={logoutHandler}>
-                      <FontAwesomeIcon icon={faSignOutAlt} className="me-1" /> Sair
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+              <LinkContainer to="/tournaments">
+                <Nav.Link>Torneios</Nav.Link>
+              </LinkContainer>
+
+              {userInfo ? (
+                <>
+                  {userInfo.isAdmin ? (
+                    <NavDropdown title="Admin" id="adminmenu">
+                      <LinkContainer to="/admin/dashboard">
+                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/admin/tournaments">
+                        <NavDropdown.Item>Torneios</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/admin/teams">
+                        <NavDropdown.Item>Times</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/admin/players">
+                        <NavDropdown.Item>Jogadores</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/admin/reports">
+                        <NavDropdown.Item>Relatórios</NavDropdown.Item>
+                      </LinkContainer>
+                    </NavDropdown>
+                  ) : (
+                    <NavDropdown title="Capitão" id="captainmenu">
+                      <LinkContainer to="/captain/dashboard">
+                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/captain/team">
+                        <NavDropdown.Item>Meu Time</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/captain/players">
+                        <NavDropdown.Item>Jogadores</NavDropdown.Item>
+                      </LinkContainer>
+                    </NavDropdown>
+                  )}
+                  <NavDropdown title={userInfo.name} id="username">
+                    <LinkContainer to="/profile">
+                      <NavDropdown.Item>Perfil</NavDropdown.Item>
+                    </LinkContainer>
+                    <LinkContainer to="/change-password">
+                      <NavDropdown.Item>Alterar Senha</NavDropdown.Item>
+                    </LinkContainer>
+                    <NavDropdown.Item onClick={logoutHandler}>
+                      Sair
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                </>
               ) : (
                 <>
-                  <Nav.Link as={Link} to="/login">
-                    <Button variant="outline-light" size="sm">
-                      Login
-                    </Button>
-                  </Nav.Link>
-                  <Nav.Link as={Link} to="/register">
-                    <Button className="btn-gradient" size="sm">
-                      Cadastrar
-                    </Button>
-                  </Nav.Link>
+                  <LinkContainer to="/login">
+                    <Nav.Link>
+                      <i className="fas fa-user"></i> Login
+                    </Nav.Link>
+                  </LinkContainer>
+                  <LinkContainer to="/register">
+                    <Nav.Link>
+                      <i className="fas fa-user-plus"></i> Cadastro
+                    </Nav.Link>
+                  </LinkContainer>
                 </>
               )}
             </Nav>

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Carousel } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrophy, faUsers, faGamepad, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
 const HomePage = () => {
@@ -13,8 +11,11 @@ const HomePage = () => {
     const fetchTournaments = async () => {
       try {
         const { data } = await axios.get('/api/tournaments');
-        // Pegar apenas os 3 torneios mais recentes
-        setTournaments(data.slice(0, 3));
+        // Mostrar apenas torneios ativos com inscrições abertas
+        const activeTournaments = data.filter(
+          tournament => tournament.registrationOpen && new Date(tournament.endDate) >= new Date()
+        );
+        setTournaments(activeTournaments);
       } catch (error) {
         console.error('Erro ao buscar torneios:', error);
       } finally {
@@ -25,157 +26,113 @@ const HomePage = () => {
     fetchTournaments();
   }, []);
 
-  return (
-    <>
-      {/* Hero Section */}
-      <div className="gradient-bg text-white p-5 rounded-3 mb-5">
-        <Row className="align-items-center">
-          <Col md={7}>
-            <h1 className="display-4 fw-bold">Erechim E-SPORTS Festival</h1>
-            <p className="lead">
-              Participe dos campeonatos de Counter Strike 2, League of Legends, Valorant e TFT.
-              Registre seu time ou inscreva-se individualmente para TFT.
-            </p>
-            <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-              <Link to="/tournaments">
-                <Button size="lg" className="btn-gradient px-4 me-md-2">
-                  <FontAwesomeIcon icon={faTrophy} className="me-2" />
-                  Ver Campeonatos
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button size="lg" variant="outline-light" className="px-4">
-                  <FontAwesomeIcon icon={faUsers} className="me-2" />
-                  Cadastrar Time
-                </Button>
-              </Link>
-            </div>
-          </Col>
-          <Col md={5} className="text-center">
-            <img
-              src="/logo.png"
-              alt="Erechim E-SPORTS Festival Logo"
-              className="img-fluid"
-              style={{ maxHeight: '300px' }}
-            />
-          </Col>
-        </Row>
-      </div>
+  const getGameNames = (gameCodes) => {
+    return gameCodes.map(code => {
+      switch(code) {
+        case 'cs2': return 'Counter Strike 2';
+        case 'lol': return 'League of Legends';
+        case 'valorant': return 'Valorant';
+        case 'tft': return 'TFT';
+        default: return code;
+      }
+    }).join(', ');
+  };
 
-      {/* Games Section */}
-      <h2 className="text-center mb-4">Jogos</h2>
-      <Row className="mb-5">
-        <Col md={3} sm={6} className="mb-4">
-          <Card className="h-100 text-center">
-            <Card.Header className="gradient-bg">
-              <h5 className="mb-0">Counter Strike 2</h5>
-            </Card.Header>
-            <Card.Body>
-              <FontAwesomeIcon icon={faGamepad} size="3x" className="mb-3 cs2-color" />
-              <Card.Text>
-                Forme sua equipe de 5 jogadores e participe dos campeonatos de CS2.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+  return (
+    <Container className="py-5">
+      <Row className="align-items-center mb-5">
+        <Col md={6} className="text-center text-md-start">
+          <h1 className="display-4 fw-bold mb-4">Erechim E-sports Festival</h1>
+          <p className="lead mb-4">
+            Bem-vindo à plataforma oficial do Erechim E-sports Festival! Participe dos campeonatos de Counter Strike 2, 
+            League of Legends, Valorant e TFT.
+          </p>
+          <div className="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+            <Link to="/tournaments" className="btn btn-primary btn-lg">
+              Ver Torneios
+            </Link>
+            <Link to="/register" className="btn btn-outline-secondary btn-lg">
+              Cadastre-se
+            </Link>
+          </div>
         </Col>
-        <Col md={3} sm={6} className="mb-4">
-          <Card className="h-100 text-center">
-            <Card.Header className="gradient-bg">
-              <h5 className="mb-0">League of Legends</h5>
-            </Card.Header>
-            <Card.Body>
-              <FontAwesomeIcon icon={faGamepad} size="3x" className="mb-3 lol-color" />
-              <Card.Text>
-                Reúna sua equipe de 5 jogadores e participe dos campeonatos de LoL.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3} sm={6} className="mb-4">
-          <Card className="h-100 text-center">
-            <Card.Header className="gradient-bg">
-              <h5 className="mb-0">Valorant</h5>
-            </Card.Header>
-            <Card.Body>
-              <FontAwesomeIcon icon={faGamepad} size="3x" className="mb-3 valorant-color" />
-              <Card.Text>
-                Monte sua equipe de 5 jogadores e participe dos campeonatos de Valorant.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3} sm={6} className="mb-4">
-          <Card className="h-100 text-center">
-            <Card.Header className="gradient-bg">
-              <h5 className="mb-0">TFT</h5>
-            </Card.Header>
-            <Card.Body>
-              <FontAwesomeIcon icon={faGamepad} size="3x" className="mb-3 tft-color" />
-              <Card.Text>
-                Inscreva-se individualmente e participe dos campeonatos de TFT.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+        <Col md={6} className="text-center mt-4 mt-md-0">
+          <img 
+            src="/logo.png" 
+            alt="Erechim E-sports Festival" 
+            className="img-fluid" 
+            style={{ maxHeight: '300px' }}
+          />
         </Col>
       </Row>
 
-      {/* Tournaments Section */}
-      <h2 className="text-center mb-4">Próximos Campeonatos</h2>
+      <h2 className="text-center mb-4">Torneios em Destaque</h2>
+      
       {loading ? (
-        <div className="text-center py-5 loading">Carregando campeonatos...</div>
-      ) : tournaments.length > 0 ? (
+        <p className="text-center">Carregando torneios...</p>
+      ) : tournaments.length === 0 ? (
+        <div className="text-center">
+          <p>Não há torneios com inscrições abertas no momento.</p>
+          <p>Fique atento para os próximos campeonatos!</p>
+        </div>
+      ) : (
         <Row>
-          {tournaments.map((tournament) => (
-            <Col md={4} key={tournament._id} className="mb-4">
-              <Card className="h-100">
-                <Card.Header className="gradient-bg">
-                  <h5 className="mb-0">{tournament.name}</h5>
-                </Card.Header>
+          {tournaments.map(tournament => (
+            <Col key={tournament._id} md={6} lg={4} className="mb-4">
+              <Card className="h-100 shadow-sm">
                 <Card.Body>
+                  <Card.Title>{tournament.name}</Card.Title>
                   <Card.Text>
-                    <FontAwesomeIcon icon={faCalendarAlt} className="me-2" />
-                    {new Date(tournament.startDate).toLocaleDateString('pt-BR')} até{' '}
-                    {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
+                    <strong>Jogos:</strong> {getGameNames(tournament.games)}
+                    <br />
+                    <strong>Início:</strong> {new Date(tournament.startDate).toLocaleDateString('pt-BR')}
+                    <br />
+                    <strong>Término:</strong> {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
+                    <br />
+                    <strong>Inscrições até:</strong> {new Date(tournament.registrationEndDate).toLocaleDateString('pt-BR')}
                   </Card.Text>
-                  <Card.Text>
-                    <strong>Jogos:</strong>{' '}
-                    {tournament.games.join(', ')}
-                  </Card.Text>
-                  <Card.Text>
-                    <strong>Status:</strong>{' '}
-                    {tournament.status === 'draft' && 'Em preparação'}
-                    {tournament.status === 'registration' && 'Inscrições abertas'}
-                    {tournament.status === 'ongoing' && 'Em andamento'}
-                    {tournament.status === 'completed' && 'Finalizado'}
-                  </Card.Text>
-                  <div className="d-grid">
-                    <Link to={`/tournaments/${tournament._id}`}>
-                      <Button className="btn-gradient">Ver Detalhes</Button>
-                    </Link>
-                  </div>
                 </Card.Body>
+                <Card.Footer className="bg-white border-top-0">
+                  <Link to={`/tournaments/${tournament._id}`} className="btn btn-primary w-100">
+                    Ver Detalhes
+                  </Link>
+                </Card.Footer>
               </Card>
             </Col>
           ))}
         </Row>
-      ) : (
-        <div className="text-center py-5">
-          <p>Nenhum campeonato disponível no momento.</p>
-          <p>Fique atento para os próximos eventos!</p>
-        </div>
       )}
 
-      {/* Call to Action */}
-      <div className="text-center py-5 mt-4">
-        <h3>Pronto para participar?</h3>
-        <p className="lead">Cadastre-se agora e faça parte do Erechim E-SPORTS Festival!</p>
-        <Link to="/register">
-          <Button size="lg" className="btn-gradient px-5 mt-3">
-            Cadastrar
-          </Button>
-        </Link>
-      </div>
-    </>
+      <Row className="mt-5 py-4 bg-light rounded">
+        <Col md={12} className="text-center mb-4">
+          <h2>Jogos</h2>
+        </Col>
+        <Col md={3} className="text-center mb-4">
+          <div className="game-icon mb-3">
+            <i className="fas fa-crosshairs fa-3x"></i>
+          </div>
+          <h4>Counter Strike 2</h4>
+        </Col>
+        <Col md={3} className="text-center mb-4">
+          <div className="game-icon mb-3">
+            <i className="fas fa-gamepad fa-3x"></i>
+          </div>
+          <h4>League of Legends</h4>
+        </Col>
+        <Col md={3} className="text-center mb-4">
+          <div className="game-icon mb-3">
+            <i className="fas fa-shield-alt fa-3x"></i>
+          </div>
+          <h4>Valorant</h4>
+        </Col>
+        <Col md={3} className="text-center mb-4">
+          <div className="game-icon mb-3">
+            <i className="fas fa-chess fa-3x"></i>
+          </div>
+          <h4>TFT</h4>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

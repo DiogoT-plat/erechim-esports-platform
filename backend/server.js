@@ -1,3 +1,4 @@
+
 // Atualizar o arquivo server.js para incluir as novas rotas
 const express = require('express');
 const cors = require('cors');
@@ -29,9 +30,18 @@ app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/brackets', bracketRoutes);
 
 // Rota inicial para verificar se o servidor está funcionando
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({ message: 'API da Plataforma Erechim E-SPORTS Festival está funcionando!' });
 });
+
+// Serve o frontend React em produção
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'));
+  });
+}
 
 // Inicializar o servidor
 const PORT = process.env.PORT || 5000;
